@@ -2,7 +2,6 @@ package com.example.budgettracker
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.*
@@ -109,9 +108,10 @@ fun TopBar(modifier: Modifier = Modifier) {
 
 @Composable
 fun TopSection(
-    budget: Int,
     totalIncome: Int,
     totalExpense: Int,
+    setTotalIncome: (Int) -> Unit,
+    setTotalExpense: (Int) -> Unit,
     typeInput: String,
     onTypeInputChanged: (String) -> Unit,
     descriptionInput: String,
@@ -125,6 +125,7 @@ fun TopSection(
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val budget = totalIncome - totalExpense
 
     val formattedBudget = NumberFormat
         .getCurrencyInstance(Locale("en", "in")).format(budget)
@@ -294,6 +295,7 @@ fun TopSection(
                                         description = descriptionInput,
                                         amount = amountInput.toInt()
                                     )
+                                    setTotalIncome(totalIncome + amountInput.toInt())
                                     incomeListUpdate(incomeList + listOf(income))
                                     onDescriptionInputChanged("")
                                     onAmountInputChanged("")
@@ -304,12 +306,11 @@ fun TopSection(
                                         description = descriptionInput,
                                         amount = amountInput.toInt()
                                     )
+                                    setTotalExpense(totalExpense + amountInput.toInt())
                                     expenseListUpdate(expenseList + listOf(expense))
                                     onDescriptionInputChanged("")
                                     onAmountInputChanged("")
                                 }
-                                Log.i("Income", incomeList.toString())
-                                Log.i("expense", expenseList.toString())
                             },
                             modifier = modifier
                                 .weight(1f)
@@ -353,7 +354,7 @@ fun BottomSection(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 50.dp),
+            .padding(start = 15.dp, end = 15.dp, top = 20.dp, bottom = 50.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Row(modifier = modifier.padding(bottom = 15.dp)) {
@@ -363,7 +364,7 @@ fun BottomSection(
                 color = MaterialTheme.colors.primary
             )
         }
-        Row(modifier = modifier.padding(bottom = 15.dp)) {
+        Row(modifier = modifier.padding(bottom = 25.dp)) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 incomeList.forEach { income ->
                     ListItem(item = income)
@@ -409,49 +410,15 @@ fun BottomBar(modifier: Modifier = Modifier) {
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun MainScreen() {
-    val budget by remember { mutableStateOf(19000) }
-    val totalIncome by remember { mutableStateOf( 25000) }
-    val totalExpense by remember { mutableStateOf(6000) }
+    var totalIncome by remember { mutableStateOf( 0) }
+    var totalExpense by remember { mutableStateOf(0) }
     var typeInput by remember { mutableStateOf("+" )}
     var descriptionInput by remember { mutableStateOf("") }
     var amountInput by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
 
-    var incomeList by mutableStateOf(listOf(
-        CashFlow(
-            "123",
-            "+",
-            "Salary",
-            25000,
-        ),
-        CashFlow(
-            "124",
-            "+",
-            "Project",
-            5000,
-        )
-    ))
-    var expenseList by mutableStateOf(listOf(
-            CashFlow(
-                "111",
-                "-",
-                "Deductions",
-                10000
-            ),
-            CashFlow(
-                id = "112",
-                "-",
-                "Household necessities",
-                3000,
-            ),
-            CashFlow(
-                id = "113",
-                "-",
-                "Bills",
-                2000,
-            )
-        )
-    )
+    var incomeList by mutableStateOf(listOf<CashFlow>())
+    var expenseList by mutableStateOf(listOf<CashFlow>())
 
     Scaffold(
         topBar = { TopBar() },
@@ -464,9 +431,10 @@ fun MainScreen() {
         ) {
             Row () {
                 TopSection(
-                    budget,
                     totalIncome,
                     totalExpense,
+                    {totalIncome = it},
+                    {totalExpense = it},
                     typeInput,
                     {typeInput = it},
                     descriptionInput,
