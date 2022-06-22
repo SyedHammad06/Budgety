@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Budgety</string>
+    <string name="footer_text">Developed by Syed Hammad</string>
+    <string name="current_balance">Current Balance :-</string>
+    <string name="total_income">Total Income :-</string>
+    <string name="total_expense">Total Expense :-</string>
+    <string name="income_subheading">Income Sources :-</string>
+    <string name="expense_subheading">Expense Sources :-</string>
+</resources>
